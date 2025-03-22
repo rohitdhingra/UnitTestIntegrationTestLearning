@@ -7,7 +7,7 @@ class CalculatorTest {
     private final Calculator calculator = new Calculator();
 
     @Test
-    void testIntegerDivision() {
+    void testIntegerDivision_whenValidValuesProvided_shouldReturnExpectedResult() {
         int result = calculator.integerDivision(8, 2);
         if (result == 4) {
             System.out.println("Test passed");
