@@ -1,6 +1,7 @@
 package com.learning.service;
 
 import com.learning.entities.User;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,12 +31,14 @@ class UserServiceTest {
 
 
 
+
         //Act
         User user = userService.createUser( firstName, lastName, email, password, repeatPassword);
 
         //Assert
 
         assertNotNull(user,"create method should not be null");
+
         assertEquals(firstName,user.getFirstName(),"First name should be same as provided");
         assertEquals(lastName,user.getLastName(),"Last name should be same as provided");
         assertEquals(email,user.getEmail(),"Email should be same as provided");

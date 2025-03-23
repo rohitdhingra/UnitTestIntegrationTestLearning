@@ -1,6 +1,7 @@
 package com.learning.entities;
 
 public class User {
+
     private String firstName;
     private String lastName;
     private String email;
@@ -46,4 +47,5 @@ public class User {
     public void setId(String id) {
         this.id = id;
     }
+
 }
