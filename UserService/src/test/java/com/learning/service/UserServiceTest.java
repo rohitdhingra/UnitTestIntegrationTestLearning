@@ -2,18 +2,28 @@ package com.learning.service;
 
 import com.learning.entities.User;
 
+import com.learning.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@ExtendWith(MockitoExtension.class)
 class UserServiceTest {
+    @Mock
+    UserRepository userRepository;
     String firstName;
     String lastName;
     String email;
     String password;
     String repeatPassword;
-    UserService userService;
+    @InjectMocks
+    UserServiceImpl userService;
 
     @BeforeEach
     void init()
@@ -23,14 +33,11 @@ class UserServiceTest {
         email = "rsharma@gmail.com";
         password = "12345678";
         repeatPassword = "12345678";
-        userService = new UserServiceImpl();
     }
     @Test
     void testCreateUser_whenUserDetailsProvided_returnsUserObject(){
         //Arrange
-
-
-
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(true);
 
         //Act
         User user = userService.createUser( firstName, lastName, email, password, repeatPassword);
@@ -50,8 +57,6 @@ class UserServiceTest {
     {
         //Arrange
        firstName = null ;
-
-
 
         //Act & Assert
         IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> userService.createUser(firstName, lastName, email, password, repeatPassword));
