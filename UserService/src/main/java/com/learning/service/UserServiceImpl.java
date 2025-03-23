@@ -11,9 +11,11 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     UserRepository userRepository;
+    private EmailVerificationService emailVerificationService;
 
-    public UserServiceImpl(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository, EmailVerificationService emailVerificationService) {
         this.userRepository = userRepository;
+        this.emailVerificationService = emailVerificationService;
     }
 
     @Override
@@ -23,10 +25,24 @@ public class UserServiceImpl implements UserService {
         if(lastName.isEmpty())
             throw new IllegalArgumentException("User lastName is Mandatory");
         User user = new User(firstName, lastName, email, UUID.randomUUID().toString());
-
-        boolean isUserCreated = userRepository.save(user);
+        boolean isUserCreated;
+        try {
+            isUserCreated = userRepository.save(user);
+        }
+        catch (RuntimeException e)
+        {
+            throw new UserServiceException(e.getMessage());
+        }
         if(!isUserCreated)
             throw new UserServiceException("User not created");
+
+        try {
+            emailVerificationService.scheduleEmailVerification(user);
+        }
+        catch (RuntimeException e)
+        {
+            throw new UserServiceException(e.getMessage());
+        }
         return user;
 
     }

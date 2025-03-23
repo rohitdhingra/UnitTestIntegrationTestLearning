@@ -2,8 +2,11 @@ package com.learning.service;
 
 import com.learning.entities.User;
 
+import com.learning.exceptions.EmailNotificationServiceException;
+import com.learning.exceptions.UserServiceException;
 import com.learning.repositories.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,11 +15,16 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doCallRealMethod;
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
     @Mock
     UserRepository userRepository;
+
+    @Mock
+    EmailVerificationServiceImpl emailVerificationService;
+
     String firstName;
     String lastName;
     String email;
@@ -50,6 +58,7 @@ class UserServiceTest {
         assertEquals(lastName,user.getLastName(),"Last name should be same as provided");
         assertEquals(email,user.getEmail(),"Email should be same as provided");
         assertNotNull(user.getId());
+        Mockito.verify(userRepository,Mockito.times(1)).save(Mockito.any(User.class));
     }
 
     @Test
@@ -66,4 +75,45 @@ class UserServiceTest {
 
     }
 
+    @Test
+    void testCreateUser_whenSaveMethodThrowsException_thenThrowsUserServiceException()
+    {
+        //Arrange
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenThrow(RuntimeException.class);
+
+        //Act & Assert
+        UserServiceException thrown = assertThrows(UserServiceException.class, () -> userService.createUser(firstName, lastName, email, password, repeatPassword),"Should throw UserServiceException");
+
+        //Assert
+//        assertEquals("User not created",thrown.getMessage());
+    }
+
+    @Test
+    @DisplayName("Email Notification Exception is handled")
+    void testCreateUser_whenEmailVerificationServiceThrowsException_thenThrowsUserServiceException() {
+        //Arrange
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(true);
+        Mockito.doThrow(EmailNotificationServiceException.class)
+                .when(emailVerificationService)
+                .scheduleEmailVerification(Mockito.any(User.class));
+//        Mockito.doNothing().when(emailVerificationService).scheduleEmailVerification(Mockito.any(User.class));
+        //Act & Assert
+        UserServiceException thrown = assertThrows(UserServiceException.class, () -> userService.createUser(firstName, lastName, email, password, repeatPassword), "Should throw UserServiceException");
+
+        //Assert
+        Mockito.verify(emailVerificationService, Mockito.times(1)).scheduleEmailVerification(Mockito.any(User.class));
+    }
+
+    @Test
+    void testCreateUser_whenUserCreated_schedulesEmailConfirmation() {
+        //Arrange
+        Mockito.when(userRepository.save(Mockito.any(User.class))).thenReturn(true);
+        Mockito.doCallRealMethod().when(emailVerificationService).scheduleEmailVerification(Mockito.any(User.class));
+
+        //Act
+        User user = userService.createUser(firstName, lastName, email, password, repeatPassword);
+
+        //Assert
+        Mockito.verify(emailVerificationService, Mockito.times(1)).scheduleEmailVerification(user);
+    }
 }
