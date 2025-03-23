@@ -10,5 +10,8 @@
         <module name="UserService" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="UserService" target="21" />
+    </bytecodeTargetLevel>
   </component>
 </project>
