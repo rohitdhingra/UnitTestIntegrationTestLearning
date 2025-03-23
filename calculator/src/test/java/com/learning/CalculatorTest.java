@@ -1,9 +1,11 @@
 package com.learning;
 
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvFileSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Test Math Operations in Calculation Class")
 class CalculatorTest {
@@ -78,4 +80,35 @@ class CalculatorTest {
         //Assert
         assertEquals(6, result,"The result of 8 minus 2 should be 6");
     }
+
+
+    @ParameterizedTest
+    @ValueSource( strings = {"John","Doe","Jane"})
+    void valueSourceDemonstration(String firstName)
+    {
+        System.out.println("First Name is "+firstName);
+        assertNotNull(firstName);
+    }
+
+
+    @ParameterizedTest
+//    @MethodSource("integerSubtractionInputParameters")
+//    @MethodSource
+//    @CsvSource({"8,2,6","10,5,5","30,20,10"})
+    @CsvFileSource(resources = "/integerSubtraction.csv")
+    @DisplayName("Test integerSubtraction with [minuend,subtrahend,expectedResult] Parameters")
+    void testIntegerSubtractionWithParameters_whenValidValuesProvided_shouldReturnExpectedResult(int minuend, int subtrahend, int expectedResult) {
+        System.out.println("Running test "+minuend+"-"+subtrahend+"="+expectedResult);
+        //Act
+        int actualResult = calculator.integerSubtraction(minuend, subtrahend);
+        //Assert
+        assertEquals(expectedResult, actualResult,"The result of 8 minus 2 should be 6");
+    }
+
+//    private static Stream<Arguments> testIntegerSubtractionWithParameters_whenValidValuesProvided_shouldReturnExpectedResult()
+//    {
+//        return Stream.of(Arguments.of(8,2,6),
+//                Arguments.of(10,5,5),
+//                Arguments.of(30,20,10));
+//    }
 }
